@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ОКС 71 — интерактивная карта объектов капитального строительства Тульской области</title>
+<meta name="description" content="Портал объектов капитального строительства Тульской области: карта муниципалитетов, карточки объектов, пешая доступность, закупки, аналитика.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/vendor/leaflet/leaflet.css" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/project-map.css">
+</head>
+<body>
+<a class="skip-link" href="#objList">Перейти к списку объектов</a>
+
+<header class="topbar">
+  <a class="brand" href="#" aria-label="ОКС 71 — на главную">
+    <span class="brand-mark" aria-hidden="true">71</span>
+    <span>
+      <span class="brand-title">ОКС 71</span>
+      <div class="brand-sub">Объекты капитального строительства Тульской области</div>
+    </span>
+  </a>
+<button type="button" class="btn" id="menusToggle" aria-expanded="true">Свернуть все меню</button>
+</header>
+
+<!-- ======== КАРТА И КАТАЛОГ ======== -->
+<div class="layout" id="viewMap">
+  <aside class="sidebar" aria-label="Каталог и фильтры">
+    <button type="button" class="panel-toggle" id="catalogToggle" aria-expanded="true" aria-controls="catalogContent">Каталог и фильтры ▾</button>
+    <div id="catalogContent">
+    <div class="mode-tabs" role="group" aria-label="Режим реестра">
+      <button type="button" data-mode="commissioned" aria-pressed="true">Введены</button>
+      <button type="button" data-mode="building" aria-pressed="false">Строятся</button>
+      <button type="button" data-mode="planned" aria-pressed="false">Планируются</button>
+      <button type="button" data-mode="all" aria-pressed="false">Все</button>
+    </div>
+    <div class="side-scroll">
+      <div class="search-row">
+        <label class="visually-hidden" for="searchInput">Поиск по названию и адресу</label>
+        <input id="searchInput" type="search" placeholder="Поиск по названию или адресу" autocomplete="off">
+      </div>
+      <label class="viewport-filter"><input type="checkbox" id="unmappedOnly">Только подобранные координаты (≈)</label>
+      <div class="filters" id="filters"></div>
+      <div class="chips" id="chips"></div>
+      <button type="button" class="btn btn-ghost" id="clearAll" style="display:none">Сбросить всё</button>
+
+      <div class="result-head">
+        <h2>Список объектов</h2>
+        <span class="result-count" id="resultCount"></span>
+      </div>
+      <div class="sort-row">
+        <label for="sortSel">Сортировка:</label>
+        <select id="sortSel">
+          <option value="name">по названию</option>
+          <option value="year">по году (сначала новые)</option>
+        </select>
+      </div>
+      <label class="viewport-filter">
+        <input type="checkbox" id="vpOnly">
+        Показывать только объекты в видимой области карты
+      </label>
+      <ul class="obj-list" id="objList" tabindex="-1"></ul>
+      <div class="pager" id="pager"></div>
+    </div>
+    </div>
+  </aside>
+
+  <div class="map-wrap">
+    <div id="map" aria-label="Карта Тульской области"></div>
+    <details class="map-toolbar" open>
+      <summary>Управление картой</summary>
+      <div class="map-toolbar-row">
+        <button type="button" class="map-btn" id="fitAll">Показать всю область</button>
+        <button type="button" class="map-btn" id="locateBtn">Моё местоположение</button>
+      </div>
+      <div class="crumb" id="crumb">
+        <button type="button" class="btn btn-ghost" id="crumbBack" aria-label="Вернуться к карте области">← Область</button>
+        <span>Муниципалитет: <b id="crumbName"></b></span>
+      </div>
+    </details>
+
+    <details class="layer-panel" open aria-label="Аналитические слои">
+      <summary>Настройки карты</summary>
+      <label class="full-map-option"><input type="checkbox" id="fullMap"> Показать всю карту</label>
+      <label class="visually-hidden" for="layerSel">Выбор слоя</label>
+      <select id="layerSel">
+        <option value="none">Без аналитики (муниципалитеты)</option>
+        <option value="prov">Социальная нагрузка (светофор)</option>
+        <option value="sat">Удовлетворённость граждан (ПОС)</option>
+      </select>
+      <div id="provSectorRow" style="display:none">
+        <label class="visually-hidden" for="provSector">Отрасль</label>
+        <select id="provSector">
+          <option value="edu">Образование</option>
+          <option value="health">Здравоохранение</option>
+          <option value="sport">Спорт</option>
+          <option value="energy">Энергетика</option>
+          <option value="culture">Культура</option>
+        </select>
+      </div>
+      <div class="scenario" id="scenarioRow" style="display:none" role="radiogroup" aria-label="Сценарий расчёта">
+        <label><input type="radio" name="scen" value="now" checked> Сейчас</label>
+        <label><input type="radio" name="scen" value="future"> С учётом планируемых</label>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">Одновременно активен один цветовой слой поверх карты. Карта и каталог показывают один набор отфильтрованных объектов из архива.</div>
+    </details>
+
+    <div id="mapStatus" role="status" hidden></div>
+    <div class="legend" id="legend" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- ======== КАРТОЧКА ОКС ======== -->
+<section class="card-panel" id="cardPanel" role="dialog" aria-modal="false" aria-hidden="true" aria-labelledby="cardTitle">
+  <div class="card-head">
+    <h2 id="cardTitle"></h2>
+    <div class="card-tools">
+      <button type="button" class="btn" id="cardMinimize" aria-expanded="true" aria-label="Свернуть карточку">−</button>
+      <button type="button" class="btn" id="cardClose" aria-label="Закрыть карточку">✕</button>
+    </div>
+  </div>
+  <div class="card-tabs" role="tablist" aria-label="Разделы карточки">
+    <button type="button" role="tab" data-tab="overview" aria-selected="true">Обзор</button>
+    <button type="button" role="tab" data-tab="media" aria-selected="false">До / В процессе / После</button>
+    <button type="button" role="tab" data-tab="access" aria-selected="false">Пешая доступность</button>
+    <button type="button" role="tab" data-tab="procure" aria-selected="false">Закупки</button>
+    <button type="button" role="tab" data-tab="report" aria-selected="false">Сообщить о проблеме</button>
+  </div>
+  <div class="card-body" id="cardBody"></div>
+</section>
+
+<script src="../assets/vendor/leaflet/leaflet.js" referrerpolicy="no-referrer"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/panels.js"></script>
+</body>
+</html>

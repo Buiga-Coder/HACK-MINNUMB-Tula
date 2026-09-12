@@ -1,0 +1,49 @@
+{
+  "sectors": {
+    "edu": "Образование",
+    "health": "Здравоохранение",
+    "sport": "Спорт",
+    "energy": "Энергетика",
+    "culture": "Культура",
+    "infra": "Коммунальная инфраструктура",
+    "housing": "Жильё",
+    "roads": "Дорожное хозяйство"
+  },
+  "provSectors": [
+    "edu",
+    "health",
+    "sport",
+    "energy",
+    "culture"
+  ],
+  "stages": {
+    "design": "Проектирование",
+    "construction": "Строительство",
+    "commissioning": "Ввод в эксплуатацию",
+    "operation": "Эксплуатация"
+  },
+  "statuses": {
+    "planned": "Планируется",
+    "building": "Строится",
+    "paused": "Приостановлен",
+    "done_no_commission": "Работы завершены (без ввода)",
+    "commissioned": "Введён в эксплуатацию",
+    "archived": "Архив"
+  },
+  "ownership": {
+    "municipal": "Муниципальная",
+    "regional": "Государственная (областная)",
+    "federal": "Государственная (федеральная)",
+    "private": "Частная (концессия)"
+  },
+  "sectorIcons": {
+    "edu": "🏫",
+    "health": "🏥",
+    "sport": "🏟",
+    "energy": "⚡",
+    "culture": "🎭",
+    "infra": "🚰",
+    "housing": "🏠",
+    "roads": "🛣"
+  }
+}

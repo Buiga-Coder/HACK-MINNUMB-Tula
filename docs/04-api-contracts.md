@@ -15,7 +15,7 @@ JSON UTF-8, GeoJSON для геометрии; UUID для внутренних 
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Проверьте параметры запроса",
-    "fields": [{"path": "minutes", "reason": "Допустимы 10 и 15"}],
+    "fields": [{"path": "minutes", "reason": "Допустимы целые минуты от 5 до 30"}],
     "request_id": "example-request-id"
   }
 }
@@ -47,7 +47,7 @@ bbox: west,south,east,north. Для этого портала west < east, south
 POST /objects/{id}/isochrones — публичная вычислительная операция с ограничением частоты. Тело:
 
 ```json
-{"minutes":[10,15],"profile":"walking","scenario":"current_network"}
+{"minutes":[5,10,15,20,25,30],"profile":"walking","scenario":"current_network"}
 ```
 
 Ответ 200: FeatureCollection, properties каждой зоны содержит minutes, profile, graph_version, entrance_revision, calculated_at, is_forecast, approximate, warnings. Геометрия Polygon/MultiPolygon. Лимит 5 секунд целевой, серверный таймаут 10 секунд; при превышении — 503 с понятной причиной. NO_ROUTABLE_ENTRANCE → 422. Недопустимый сценарий → 422. Фактическая структура должна быть включена в OpenAPI при реализации.
